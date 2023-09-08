@@ -23,7 +23,26 @@ class RegisterSerializer(serializers.Serializer):
         return attrs
 
 
+class ReviewSerializer(serializers.ModelSerializer):
+
+    def get_book(self, obj):
+        return obj.book.name
+
+    book = serializers.SerializerMethodField('get_book', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = '__all__'
+
+
+class ReviewCreateSerializer(serializers.Serializer):
+    book = serializers.IntegerField()
+    pages_read = serializers.IntegerField()
+    rating = serializers.IntegerField()
+
+
 class BookSerializer(serializers.ModelSerializer):
+    reviews = ReviewSerializer(many=True, read_only=True)
 
     class Meta:
         model = Book
@@ -35,6 +54,5 @@ class BookCreateSerializer(serializers.Serializer):
     description = serializers.CharField()
     author = serializers.CharField()
     pages = serializers.IntegerField()
-    pages_read = serializers.IntegerField()
     image = serializers.ImageField()
 

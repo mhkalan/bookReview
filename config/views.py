@@ -60,7 +60,7 @@ class RegisterAPIView(generics.CreateAPIView):
             return status500response()
 
 
-class BooksAPIView(generics.ListCreateAPIView):
+class BooksListCreateAPIView(generics.ListCreateAPIView):
     serializer_class = BookSerializer
     permission_classes = [IsAuthenticated]
 
@@ -79,14 +79,12 @@ class BooksAPIView(generics.ListCreateAPIView):
             description = serializer.data['description']
             author = serializer.data['author']
             pages = serializer.data['pages']
-            pages_read = serializer.data['pages_read']
             image = request.FILES.get('image')
             Book.objects.create(
                 name=name,
                 description=description,
                 author=author,
                 pages=pages,
-                pages_read=pages_read,
                 image=image
             )
             return status201response(serializer.data)
@@ -126,7 +124,6 @@ class BooksDetailAPIView(generics.ListCreateAPIView):
             book_info.description = description
             book_info.author = author
             book_info.pages = pages
-            book_info.pages_read = pages_read
             book_info.image = image
             book_info.save()
             return status201response(serializer.data)
@@ -143,4 +140,41 @@ class DeleteBookAPIView(generics.DestroyAPIView):
         book_info.delete()
         return status204response()
 
+
+class ReviewsListAPIView(generics.ListAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            reviews = Review.objects.all()
+            serializer = self.get_serializer(reviews, many=True)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+
+class ReviewCreatAPIView(generics.CreateAPIView):
+    serializer_class = ReviewCreateSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = ReviewCreateSerializer(request.data)
+            user = request.user
+            book = serializer.data['book']
+            pages_read = serializer.data['pages_read']
+            rating = serializer.data['rating']
+            if not Book.objects.filter(pk=book).exists():
+                return status404response(msg='کتاب مورد نظر یافت نشد')
+            book_info = Book.objects.get(pk=book)
+            Review.objects.create(
+                name=user,
+                book=book_info,
+                pages_read=pages_read,
+                rating=rating
+            )
+            return status201response(serializer.data)
+        except:
+            return status500response()
 
