@@ -59,3 +59,88 @@ class RegisterAPIView(generics.CreateAPIView):
         except:
             return status500response()
 
+
+class BooksAPIView(generics.ListCreateAPIView):
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            books = Book.objects.all()
+            serializer = self.get_serializer(books, many=True)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = BookCreateSerializer(request.data)
+            name = serializer.data['name']
+            description = serializer.data['description']
+            author = serializer.data['author']
+            pages = serializer.data['pages']
+            pages_read = serializer.data['pages_read']
+            image = request.FILES.get('image')
+            Book.objects.create(
+                name=name,
+                description=description,
+                author=author,
+                pages=pages,
+                pages_read=pages_read,
+                image=image
+            )
+            return status201response(serializer.data)
+        except:
+            return status500response()
+
+
+class BooksDetailAPIView(generics.ListCreateAPIView):
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            if not Book.objects.filter(pk=pk).exists():
+                return status404response(msg='کتاب مورد نظر یافت نشد')
+            book_info = Book.objects.get(pk=pk)
+            serializer = self.get_serializer(book_info)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+    def post(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            if not Book.objects.filter(pk=pk).exists():
+                return status404response(msg='کتاب مورد نظر یافت نشد')
+            serializer = BookCreateSerializer(request.data)
+            book_info = Book.objects.get(pk=pk)
+            name = serializer.data['name']
+            description = serializer.data['description']
+            author = serializer.data['author']
+            pages = serializer.data['pages']
+            pages_read = serializer.data['pages_read']
+            image = request.FILES.get('image')
+            book_info.name = name
+            book_info.description = description
+            book_info.author = author
+            book_info.pages = pages
+            book_info.pages_read = pages_read
+            book_info.image = image
+            book_info.save()
+            return status201response(serializer.data)
+        except:
+            return status500response()
+
+
+class DeleteBookAPIView(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        if not Book.objects.filter(pk=pk).exists():
+            return status404response(msg='کتاب مورد نظر یافت نشد')
+        book_info = Book.objects.get(pk=pk)
+        book_info.delete()
+        return status204response()
+
+

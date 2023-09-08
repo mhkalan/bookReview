@@ -22,3 +22,19 @@ class RegisterSerializer(serializers.Serializer):
             raise serializers.ValidationError({'password': None})
         return attrs
 
+
+class BookSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Book
+        fields = '__all__'
+
+
+class BookCreateSerializer(serializers.Serializer):
+    name = serializers.CharField()
+    description = serializers.CharField()
+    author = serializers.CharField()
+    pages = serializers.IntegerField()
+    pages_read = serializers.IntegerField()
+    image = serializers.ImageField()
+
