@@ -118,7 +118,6 @@ class BooksDetailAPIView(generics.ListCreateAPIView):
             description = serializer.data['description']
             author = serializer.data['author']
             pages = serializer.data['pages']
-            pages_read = serializer.data['pages_read']
             image = request.FILES.get('image')
             book_info.name = name
             book_info.description = description
@@ -177,4 +176,51 @@ class ReviewCreatAPIView(generics.CreateAPIView):
             return status201response(serializer.data)
         except:
             return status500response()
+
+
+class ReviewDetailAPIView(generics.ListCreateAPIView):
+    serializer_class = ReviewSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            if not Review.objects.filter(pk=pk).exists():
+                return status404response(msg='نظر مورد نظر یافت نشد')
+            review = Review.objects.get(pk=pk)
+            serializer = self.get_serializer(review)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+    def post(self, request, *args, **kwargs):
+        try:
+            pk = kwargs.get('pk')
+            if not Review.objects.filter(pk=pk).exists():
+                return status404response(msg='نظر مورد نظر یافت نشد')
+            review = Review.objects.get(pk=pk)
+            serializer = ReviewCreateSerializer(request.data)
+            book = serializer.data['book']
+            pages_read = serializer.data['pages_read']
+            rating = serializer.data['rating']
+            if not Book.objects.filter(pk=book).exists():
+                return status404response(msg='کتاب مورد نظر یافت نشد')
+            book_info = Book.objects.get(pk=book)
+            review.book = book_info
+            review.rating = rating
+            review.pages_read = pages_read
+            review.save()
+            return status201response(serializer.data)
+        except:
+            return status500response()
+
+
+class DeleteReviewAPIView(generics.DestroyAPIView):
+    def delete(self, request, *args, **kwargs):
+        pk = kwargs.get('pk')
+        if not Review.objects.filter(pk=pk).exists():
+            return status404response(msg='نظر مورد نظر یافت نشد')
+        review = Review.objects.get(pk=pk)
+        review.delete()
+        return status204response()
 
