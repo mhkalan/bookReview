@@ -56,3 +56,18 @@ class BookCreateSerializer(serializers.Serializer):
     pages = serializers.IntegerField()
     image = serializers.ImageField()
 
+
+class WantToReadBooksSerializer(serializers.ModelSerializer):
+    books = BookSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = WantToRead
+        fields = '__all__'
+
+
+class ListBookField(serializers.ListField):
+    child = serializers.IntegerField()
+
+
+class WantToReadBooksCreateSerialzier(serializers.Serializer):
+    books = ListBookField()

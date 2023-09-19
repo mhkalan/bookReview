@@ -224,3 +224,51 @@ class DeleteReviewAPIView(generics.DestroyAPIView):
         review.delete()
         return status204response()
 
+
+class BookSearchAPIView(generics.ListAPIView):
+    serializer_class = BookSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        search_query = self.request.query_params.get('q', '')
+        if search_query:
+            return Book.objects.filter(models.Q(title__icontains=search_query) |
+                                       models.Q(author__icontains=search_query))
+        else:
+            return Book.objects.all()
+
+
+class WantsToReadBooksAPIView(generics.ListAPIView):
+    serializer_class = WantToReadBooksSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            books = WantToRead.objects.all()
+            serializer = self.get_serializer(books, many=True)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+
+class WantsToReadCreateAPIView(generics.CreateAPIView):
+    serializer_class = WantToReadBooksCreateSerialzier
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(request.data)
+            books_id = serializer.data['books']
+            book_info = []
+            for i in range(len(books_id)):
+                if not Book.objects.filter(pk=books_id[i]).exists():
+                    return status404response(msg='کتاب مورد نظر یافت نشد')
+            for i in range(len(books_id)):
+                book = Book.objects.get(pk=books_id[i])
+                book_info.append(book)
+            class_instance = WantToRead.objects.create()
+            class_instance.books.set(book_info)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
