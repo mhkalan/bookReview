@@ -8,6 +8,8 @@ media
 venv
 .env
 env
+.idea
+idea
 
 
 ### Django ###
