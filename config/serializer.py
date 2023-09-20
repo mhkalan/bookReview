@@ -54,6 +54,7 @@ class BookCreateSerializer(serializers.Serializer):
     description = serializers.CharField()
     author = serializers.CharField()
     pages = serializers.IntegerField()
+    genre = serializers.CharField()
     image = serializers.ImageField()
 
 

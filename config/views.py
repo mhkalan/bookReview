@@ -79,12 +79,14 @@ class BooksListCreateAPIView(generics.ListCreateAPIView):
             description = serializer.data['description']
             author = serializer.data['author']
             pages = serializer.data['pages']
+            genre = serializer.data['genre']
             image = request.FILES.get('image')
             Book.objects.create(
                 name=name,
                 description=description,
                 author=author,
                 pages=pages,
+                genre=genre,
                 image=image
             )
             return status201response(serializer.data)
@@ -118,11 +120,13 @@ class BooksDetailAPIView(generics.ListCreateAPIView):
             description = serializer.data['description']
             author = serializer.data['author']
             pages = serializer.data['pages']
+            genre = serializer.data['genre']
             image = request.FILES.get('image')
             book_info.name = name
             book_info.description = description
             book_info.author = author
             book_info.pages = pages
+            book_info.genre = genre
             book_info.image = image
             book_info.save()
             return status201response(serializer.data)
@@ -244,7 +248,8 @@ class WantsToReadBooksAPIView(generics.ListAPIView):
 
     def get(self, request, *args, **kwargs):
         try:
-            books = WantToRead.objects.all()
+            user = request.user
+            books = WantToRead.objects.get(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
         except:
@@ -258,6 +263,7 @@ class WantsToReadCreateAPIView(generics.CreateAPIView):
     def post(self, request, *args, **kwargs):
         try:
             serializer = self.get_serializer(request.data)
+            user = request.user
             books_id = serializer.data['books']
             book_info = []
             for i in range(len(books_id)):
@@ -266,9 +272,88 @@ class WantsToReadCreateAPIView(generics.CreateAPIView):
             for i in range(len(books_id)):
                 book = Book.objects.get(pk=books_id[i])
                 book_info.append(book)
-            class_instance = WantToRead.objects.create()
+            class_instance = WantToRead.objects.create(
+                user=user
+            )
             class_instance.books.set(book_info)
             return status200response(serializer.data)
         except:
             return status500response()
 
+
+class ReadBooksAPIView(generics.ListAPIView):
+    serializer_class = WantToReadBooksSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            books = Read.objects.get(user=user)
+            serializer = self.get_serializer(books, many=True)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+
+class ReadCreateAPIView(generics.CreateAPIView):
+    serializer_class = WantToReadBooksCreateSerialzier
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(request.data)
+            user = request.user
+            books_id = serializer.data['books']
+            book_info = []
+            for i in range(len(books_id)):
+                if not Book.objects.filter(pk=books_id[i]).exists():
+                    return status404response(msg='کتاب مورد نظر یافت نشد')
+            for i in range(len(books_id)):
+                book = Book.objects.get(pk=books_id[i])
+                book_info.append(book)
+            class_instance = Read.objects.create(
+                user=user
+            )
+            class_instance.books.set(book_info)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+
+class CurrentlyReadingBooksAPIView(generics.ListAPIView):
+    serializer_class = WantToReadBooksSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            user = request.user
+            books = CurrentlyReading.objects.get(user=user)
+            serializer = self.get_serializer(books, many=True)
+            return status200response(serializer.data)
+        except:
+            return status500response()
+
+
+class CurrentlyReadingCreateAPIView(generics.CreateAPIView):
+    serializer_class = WantToReadBooksCreateSerialzier
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, *args, **kwargs):
+        try:
+            serializer = self.get_serializer(request.data)
+            user = request.user
+            books_id = serializer.data['books']
+            book_info = []
+            for i in range(len(books_id)):
+                if not Book.objects.filter(pk=books_id[i]).exists():
+                    return status404response(msg='کتاب مورد نظر یافت نشد')
+            for i in range(len(books_id)):
+                book = Book.objects.get(pk=books_id[i])
+                book_info.append(book)
+            class_instance = CurrentlyReading.objects.create(
+                user=user
+            )
+            class_instance.books.set(book_info)
+            return status200response(serializer.data)
+        except:
+            return status500response()
