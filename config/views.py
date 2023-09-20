@@ -234,9 +234,9 @@ class BookSearchAPIView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        search_query = self.request.query_params.get('q', '')
+        search_query = self.kwargs.get('search')
         if search_query:
-            return Book.objects.filter(models.Q(title__icontains=search_query) |
+            return Book.objects.filter(models.Q(name__icontains=search_query) |
                                        models.Q(author__icontains=search_query))
         else:
             return Book.objects.all()
@@ -249,6 +249,8 @@ class WantsToReadBooksAPIView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             user = request.user
+            if not WantToRead.objects.filter(user=user).exists():
+                return status404response(msg='شما هنوز لیستی نساخته‌اید')
             books = WantToRead.objects.get(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
@@ -288,6 +290,8 @@ class ReadBooksAPIView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             user = request.user
+            if not Read.objects.filter(user=user).exists():
+                return status404response(msg='شما هنوز لیستی نساخته‌اید')
             books = Read.objects.get(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
@@ -327,6 +331,8 @@ class CurrentlyReadingBooksAPIView(generics.ListAPIView):
     def get(self, request, *args, **kwargs):
         try:
             user = request.user
+            if not CurrentlyReading.objects.filter(user=user).exists():
+                return status404response(msg='شما هنوز لیستی نساخته‌اید')
             books = CurrentlyReading.objects.get(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
