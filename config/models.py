@@ -27,7 +27,7 @@ class Read(models.Model):
     user = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.books.name
+        return self.user
 
 
 class CurrentlyReading(models.Model):
@@ -35,7 +35,7 @@ class CurrentlyReading(models.Model):
     user = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.books.name
+        return self.user
 
 
 class WantToRead(models.Model):
@@ -43,7 +43,7 @@ class WantToRead(models.Model):
     user = models.CharField(max_length=255)
 
     def __str__(self):
-        return self.books.name
+        return self.user
 
 
 class Review(models.Model):

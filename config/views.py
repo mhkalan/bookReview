@@ -251,7 +251,7 @@ class WantsToReadBooksAPIView(generics.ListAPIView):
             user = request.user
             if not WantToRead.objects.filter(user=user).exists():
                 return status404response(msg='شما هنوز لیستی نساخته‌اید')
-            books = WantToRead.objects.get(user=user)
+            books = WantToRead.objects.filter(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
         except:
@@ -292,7 +292,7 @@ class ReadBooksAPIView(generics.ListAPIView):
             user = request.user
             if not Read.objects.filter(user=user).exists():
                 return status404response(msg='شما هنوز لیستی نساخته‌اید')
-            books = Read.objects.get(user=user)
+            books = Read.objects.filter(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
         except:
@@ -333,7 +333,7 @@ class CurrentlyReadingBooksAPIView(generics.ListAPIView):
             user = request.user
             if not CurrentlyReading.objects.filter(user=user).exists():
                 return status404response(msg='شما هنوز لیستی نساخته‌اید')
-            books = CurrentlyReading.objects.get(user=user)
+            books = CurrentlyReading.objects.filter(user=user)
             serializer = self.get_serializer(books, many=True)
             return status200response(serializer.data)
         except:
