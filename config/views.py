@@ -282,7 +282,7 @@ class WantsToReadCreateAPIView(generics.CreateAPIView):
                 return status200response(serializer.data)
             class_instance = WantToRead.objects.get(user=user)
             book_info.append(class_instance.books)
-            class_instance.books.set(book_info)
+            class_instance.books.add(*book_info)
             return status200response(serializer.data)
         except:
             return status500response()
@@ -327,8 +327,7 @@ class ReadCreateAPIView(generics.CreateAPIView):
                 class_instance.books.set(book_info)
                 return status200response(serializer.data)
             class_instance = Read.objects.get(user=user)
-            book_info.append(class_instance.books)
-            class_instance.books.set(book_info)
+            class_instance.books.add(*book_info)
             return status200response(serializer.data)
         except:
             return status500response()
@@ -374,7 +373,7 @@ class CurrentlyReadingCreateAPIView(generics.CreateAPIView):
                 return status200response(serializer.data)
             class_instance = CurrentlyReading.objects.get(user=user)
             book_info.append(class_instance.books)
-            class_instance.books.set(book_info)
+            class_instance.books.add(*book_info)
             return status200response(serializer.data)
         except:
             return status500response()
