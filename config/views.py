@@ -274,9 +274,13 @@ class WantsToReadCreateAPIView(generics.CreateAPIView):
             for i in range(len(books_id)):
                 book = Book.objects.get(pk=books_id[i])
                 book_info.append(book)
-            class_instance = WantToRead.objects.create(
-                user=user
-            )
+            if not WantToRead.objects.filter(user=user).exists():
+                class_instance = WantToRead.objects.create(
+                    user=user
+                )
+                class_instance.books.set(book_info)
+                return status200response(serializer.data)
+            class_instance = WantToRead.objects.get(user=user)
             class_instance.books.set(book_info)
             return status200response(serializer.data)
         except:
@@ -315,9 +319,13 @@ class ReadCreateAPIView(generics.CreateAPIView):
             for i in range(len(books_id)):
                 book = Book.objects.get(pk=books_id[i])
                 book_info.append(book)
-            class_instance = Read.objects.create(
-                user=user
-            )
+            if not Read.objects.filter(user=user).exists():
+                class_instance = Read.objects.create(
+                    user=user
+                )
+                class_instance.books.set(book_info)
+                return status200response(serializer.data)
+            class_instance = Read.objects.get(user=user)
             class_instance.books.set(book_info)
             return status200response(serializer.data)
         except:
@@ -356,9 +364,13 @@ class CurrentlyReadingCreateAPIView(generics.CreateAPIView):
             for i in range(len(books_id)):
                 book = Book.objects.get(pk=books_id[i])
                 book_info.append(book)
-            class_instance = CurrentlyReading.objects.create(
-                user=user
-            )
+            if not CurrentlyReading.objects.filter(user=user).exists():
+                class_instance = CurrentlyReading.objects.create(
+                    user=user
+                )
+                class_instance.books.set(book_info)
+                return status200response(serializer.data)
+            class_instance = CurrentlyReading.objects.get(user=user)
             class_instance.books.set(book_info)
             return status200response(serializer.data)
         except:
